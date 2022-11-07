@@ -7,8 +7,8 @@ def get_requirements() -> List[str]:
     '''
     requirements_list:List[str]=[]
     with open('requirements.txt') as requirements:
-        requirements_list= requirements.readlines().remove('-e .')
-    return requirements_list
+        requirements_list= requirements.readlines()
+    return requirements_list[:-1]
 
 setup(
 
