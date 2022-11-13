@@ -1,5 +1,8 @@
-from order.configuration.mongo_db_connection import MongoDBClient
+from order.pipeline.training_pipeline import TrainingPipeline
+
+def run():
+        config = TrainingPipeline()
+        return config.run_pipeline()
 
 if __name__ =="__main__":
-        mongodb_client =  MongoDBClient()
-        print(mongodb_client.database.list_collection_names())
+        run()

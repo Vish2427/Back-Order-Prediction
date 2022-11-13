@@ -3,7 +3,7 @@ from order.entity.artifact_entity import DataIngestionArtifact
 from order.logger import logging
 from order.exception import OrderException
 import sys,os
-from sensor.components.data_ingestion import DataIngestion
+from order.components.data_ingestion import DataIngestion
 
 class TrainingPipeline:
     def __init__(self):
