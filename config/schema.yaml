@@ -1,6 +1,5 @@
 columns:
   - class: category
-  - sku: object
   - national_inv: float64
   - lead_time: float64
   - in_transit_qty: float64
