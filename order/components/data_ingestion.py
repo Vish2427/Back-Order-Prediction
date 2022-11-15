@@ -2,7 +2,7 @@ from order.exception import OrderException
 from order.logger import logging
 from order.entity.config_entity import DataIngestionConfig
 from order.entity.artifact_entity import DataIngestionArtifact
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split,StratifiedShuffleSplit
 import os,sys
 from pandas import DataFrame
 from order.data_access.order_data import OrderData
@@ -15,7 +15,7 @@ class DataIngestion:
             self.data_ingestion_config=data_ingestion_config
             self._schema_config = read_yaml_file(SCHEMA_FILE_PATH)
         except Exception as e:
-            raise OrderException(e,sys)
+            raise OrderException(e,sys) from e
 
     def export_data_into_feature_store(self) -> DataFrame:
         """
@@ -33,7 +33,7 @@ class DataIngestion:
             dataframe.to_csv(feature_store_file_path,index=False,header=True)
             return dataframe
         except  Exception as e:
-            raise  OrderException(e,sys)
+            raise  OrderException(e,sys) from e
 
     def split_data_as_train_test(self, dataframe: DataFrame) -> None:
         """
@@ -41,9 +41,14 @@ class DataIngestion:
         """
 
         try:
-            train_set, test_set = train_test_split(
-                dataframe, test_size=self.data_ingestion_config.train_test_split_ratio
+            split = StratifiedShuffleSplit(n_splits=1,
+                     test_size=self.data_ingestion_config.train_test_split_ratio, 
+                     random_state=42
             )
+            for train_index,test_index in split.split(dataframe, dataframe["went_on_backorder"]):
+                train_set = dataframe.loc[train_index]
+                test_set = dataframe.loc[test_index]
+
 
             logging.info("Performed train test split on the dataframe")
 
@@ -67,7 +72,7 @@ class DataIngestion:
 
             logging.info(f"Exported train and test file path.")
         except Exception as e:
-            raise OrderData(e,sys)
+            raise OrderData(e,sys) from e
     
 
     def initiate_data_ingestion(self) -> DataIngestionArtifact:
@@ -79,4 +84,4 @@ class DataIngestion:
             test_file_path=self.data_ingestion_config.testing_file_path)
             return data_ingestion_artifact
         except Exception as e:
-            raise OrderException(e,sys)
+            raise OrderException(e,sys) from e

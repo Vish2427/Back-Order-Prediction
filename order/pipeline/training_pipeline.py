@@ -1,11 +1,14 @@
-from order.entity.config_entity import TrainingPipelineConfig,DataIngestionConfig,DataValidationConfig,DataTransformationConfig
-from order.entity.artifact_entity import DataIngestionArtifact,DataValidationArtifact,DataTransformationArtifact
+from order.entity.config_entity import TrainingPipelineConfig,DataIngestionConfig,DataValidationConfig,DataTransformationConfig, \
+    ModelTrainerConfig
+from order.entity.artifact_entity import DataIngestionArtifact,DataValidationArtifact,DataTransformationArtifact, \
+    ModelTrainerArtifact
 from order.logger import logging
 from order.exception import OrderException
 import sys,os
 from order.components.data_ingestion import DataIngestion
 from order.components.data_validation import DataValidation
 from order.components.data_transformation import DataTransformation
+from order.components.model_trainer import ModelTrainer
 
 class TrainingPipeline:
     def __init__(self):
@@ -31,7 +34,7 @@ class TrainingPipeline:
             data_validation_artifact = data_validation.initiate_data_validation()
             return data_validation_artifact
         except  Exception as e:
-            raise  OrderException(e,sys)
+            raise  OrderException(e,sys) from e
 
     def start_data_transformation(self,data_validation_artifact:DataValidationArtifact):
         try:
@@ -42,12 +45,22 @@ class TrainingPipeline:
             data_transformation_artifact =  data_transformation.initiate_data_transformation()
             return data_transformation_artifact
         except  Exception as e:
-            raise  OrderException(e,sys)
+            raise  OrderException(e,sys) from e
+
+    def start_model_trainer(self,data_transformation_artifact:DataTransformationArtifact):
+        try:
+            model_trainer_config = ModelTrainerConfig(training_pipeline_config=self.training_pipeline_config)
+            model_trainer = ModelTrainer(model_trainer_config, data_transformation_artifact)
+            model_trainer_artifact = model_trainer.initiate_model_trainer()
+            return model_trainer_artifact
+        except  Exception as e:
+            raise  SensorException(e,sys) from e
 
     def run_pipeline(self):
         try:
             data_ingestion_artifact:DataIngestionArtifact = self.start_data_ingestion()
             data_validation_artifact=self.start_data_validaton(data_ingestion_artifact=data_ingestion_artifact)
             data_transformation_artifact = self.start_data_transformation(data_validation_artifact=data_validation_artifact)
+            model_trainer_artifact = self.start_model_trainer(data_transformation_artifact=data_transformation_artifact)
         except  Exception as e:
             raise  OrderException(e,sys) from e

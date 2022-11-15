@@ -26,3 +26,6 @@ class OrderException(Exception):
 
     def __str__(self):
         return self.error_message
+    
+    def __repr__(self) -> str:
+        return OrderException.__name__.str()

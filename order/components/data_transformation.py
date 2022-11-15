@@ -73,7 +73,7 @@ class DataTransformation:
             self.data_transformation_config = data_transformation_config
 
         except Exception as e:
-            raise OrderException(e, sys)
+            raise OrderException(e, sys) from e
 
 
     @staticmethod
@@ -81,7 +81,7 @@ class DataTransformation:
         try:
             return pd.read_csv(file_path)
         except Exception as e:
-            raise OrderException(e, sys)
+            raise OrderException(e, sys) from e
 
 
     @classmethod
